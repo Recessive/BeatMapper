@@ -17,6 +17,7 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
 
     WaveformTex wf;
     AudioSource aud;
+    public RectTransform barRect;
 
     private void Start() {
         wf = GetComponent<WaveformTex>();
@@ -27,6 +28,7 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData) {
         int samp = wf.getMusicPoint(Input.mousePosition);
         aud.timeSamples = samp;
+        barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
     }
 
     bool playing = false;
@@ -36,8 +38,15 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
             aud.Play();
         } else {
             aud.Stop();
+            barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
         }
         
+    }
+
+    private void Update() {
+        if (playing) {
+            barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
+        }
     }
 
 }

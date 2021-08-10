@@ -39,6 +39,11 @@ public class WaveformTex : MonoBehaviour
         UpdateWaveform();
     }
 
+    public float sampleToPoint(int sample) {
+        float percentageComplete = (float) (sample - (midpoint - window / 2)) / window;
+        return rectTrans.rect.width*percentageComplete - (rectTrans.rect.width / 2);
+    }
+
     public int getMusicPoint(Vector2 point) {
         Vector2 truePos;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(rectTrans, point, GetComponentInParent<Canvas>().worldCamera, out truePos);
@@ -87,11 +92,6 @@ public class WaveformTex : MonoBehaviour
             return;
         }
 
-        
-
-
-
-
         int width = (int)rectTrans.rect.width;
         int height = (int)rectTrans.rect.height;
 
@@ -112,14 +112,11 @@ public class WaveformTex : MonoBehaviour
 
         Texture2D tex = new Texture2D(textWidth, textHeight, TextureFormat.RGBA32, false);
         float[] samples = new float[audioLength];
-        float[] waveform = new float[textWidth];
+        float[] waveform = new float[textWidth+1];
         audio.GetData(samples, 0);
         int packSize = ((audioEnd - audioStart) / textWidth) + 1;
 
-        if (audioStart != 0) {
-            audioStart += packSize % audioStart;
-        }
-
+        audioStart = (int) Mathf.Round(audioStart / packSize) * packSize;
 
         int s = 0;
         for (int i = audioStart; i < audioEnd; i += packSize) {
