@@ -18,10 +18,15 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
     WaveformTex wf;
     AudioSource aud;
     public RectTransform barRect;
+    public EditorDraw edDraw;
+    public AudioSource met;
+
+    float lastBeatSample;
 
     private void Start() {
         wf = GetComponent<WaveformTex>();
         aud = GetComponent<AudioSource>();
+        lastBeatSample = edDraw.offset * edDraw.samplesPerSecond - edDraw.spb;
     }
 
 
@@ -36,6 +41,7 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
         playing = !playing;
         if (playing) {
             aud.Play();
+            lastBeatSample = edDraw.LastBeat(aud.timeSamples);
         } else {
             aud.Stop();
             barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
@@ -46,6 +52,13 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
     private void Update() {
         if (playing) {
             barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
+            if(aud.timeSamples > lastBeatSample + edDraw.spb) {
+                lastBeatSample += edDraw.spb;
+
+                if (edDraw.mapping[0][edDraw.SampleToBeat(aud.timeSamples)]) {
+                    met.Play();
+                }
+            }
         }
     }
 

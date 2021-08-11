@@ -17,14 +17,15 @@ public class WaveformTex : MonoBehaviour
     public float zoomSpeed = 0.05f;
     public AnimationCurve zoomCurve;
     float zoom = 1f;
-    int window, midpoint, audioLength;
+    public int window, midpoint, audioLength;
     Image im;
     AudioSource aud;
     RectTransform rectTrans;
 
     public Scrollbar scrollbar;
+    public EditorDraw edDraw;
 
-    public void Start() {
+    public void Awake() {
         rectTrans = GetComponent<RectTransform>();
         im = GetComponent<Image>();
         aud = GetComponent<AudioSource>();
@@ -36,7 +37,7 @@ public class WaveformTex : MonoBehaviour
 
         scrollbar.onValueChanged.AddListener(drag);
 
-        UpdateWaveform();
+        UpdateWaveform(true);
     }
 
     public float sampleToPoint(int sample) {
@@ -78,7 +79,11 @@ public class WaveformTex : MonoBehaviour
     }
 
     public void UpdateWaveform() {
+        UpdateWaveform(false);
+    }
 
+    public void UpdateWaveform(bool awake) {
+      
         int start = midpoint - window / 2;
         int end = midpoint + window / 2;
 
@@ -91,6 +96,8 @@ public class WaveformTex : MonoBehaviour
             drag(1f);
             return;
         }
+
+        if(!awake) edDraw.UpdateEditor(start);
 
         int width = (int)rectTrans.rect.width;
         int height = (int)rectTrans.rect.height;
