@@ -41,7 +41,7 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
         playing = !playing;
         if (playing) {
             aud.Play();
-            lastBeatSample = edDraw.LastBeat(aud.timeSamples);
+            lastBeatSample = edDraw.LastBeatSample(aud.timeSamples);
         } else {
             aud.Stop();
             barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
@@ -52,10 +52,10 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
     private void Update() {
         if (playing) {
             barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
-            if(aud.timeSamples > lastBeatSample + edDraw.spb) {
-                lastBeatSample += edDraw.spb;
+            if(edDraw.LastBeatSample(aud.timeSamples) != lastBeatSample) {
+                lastBeatSample = edDraw.LastBeatSample(aud.timeSamples);
 
-                if (edDraw.mapping[0][edDraw.SampleToBeat(aud.timeSamples)]) {
+                if (edDraw.SampleToBeat(aud.timeSamples) != -1 && edDraw.mapping[0][edDraw.SampleToBeat(aud.timeSamples)]) {
                     met.Play();
                 }
             }

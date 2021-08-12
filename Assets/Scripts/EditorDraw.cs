@@ -31,12 +31,17 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
         UpdateEditor(0);
     }
 
-    public float LastBeat(float sample) {
-        return Mathf.Floor((sample + offset * samplesPerSecond) / spb) * spb;
+    public float LastBeatSample(float sample) {
+        if(sample < offset * samplesPerSecond) {
+            return -1;
+        } else {
+            return Mathf.Floor((sample - offset * samplesPerSecond) / spb) * spb;
+        }
     }
 
     public int SampleToBeat(float sample) {
-        return (int)(LastBeat(sample) / spb);
+        int lbs = (int) LastBeatSample(sample);
+        return lbs == -1 ? -1 : (int) (lbs / spb);
     }
 
     public void updateBpm(float newBpm) {
@@ -69,7 +74,6 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
         
 
         mapping[0][beat] = !mapping[0][beat];
-        Debug.Log(beat);
         UpdateEditor();
     }
 
@@ -96,20 +100,23 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
 
         float samplesPerPixel = wf.window / (float) textWidth;
 
-        float lastBeat = LastBeat(sample);
+        float lastBeat = LastBeatSample(sample);
         int beat = SampleToBeat(sample);
         bool isBeat;
+        float pixSamp;
+
         for (int x = 0; x < textWidth; x++) {
             isBeat = false;
-            if(x*samplesPerPixel + sample >= lastBeat + spb) {
-                lastBeat += spb;
-                beat++;
+            pixSamp = x * samplesPerPixel + sample;
+            if(LastBeatSample(pixSamp) != lastBeat) {
+                lastBeat = LastBeatSample(pixSamp);
                 isBeat = true;
+                beat = SampleToBeat(pixSamp);
             }
             for (int y = 0; y < textHeight; y++) {
                 if(isBeat) {
                     tex.SetPixel(x, y, Color.black);
-                } else if(mapping[0][beat]) {
+                } else if(beat >= 0 && mapping[0][beat]) {
                     tex.SetPixel(x, y, Color.white);
                 } else {
                     tex.SetPixel(x, y, Color.gray);

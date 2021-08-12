@@ -123,7 +123,7 @@ public class WaveformTex : MonoBehaviour
         audio.GetData(samples, 0);
         int packSize = ((audioEnd - audioStart) / textWidth) + 1;
 
-        audioStart = (int) Mathf.Round(audioStart / packSize) * packSize;
+        audioStart = (int) Mathf.Floor(audioStart / packSize) * packSize;
 
         int s = 0;
         for (int i = audioStart; i < audioEnd; i += packSize) {
