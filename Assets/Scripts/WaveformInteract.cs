@@ -36,7 +36,7 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
         barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
     }
 
-    bool playing = false;
+    public bool playing = false;
     void playpause() {
         playing = !playing;
         if (playing) {

@@ -4,16 +4,17 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
-public class EditorDraw : MonoBehaviour, IPointerClickHandler 
+public class EditorDraw : MonoBehaviour, IPointerClickHandler
 {
     public List<List<bool>> mapping = new List<List<bool>>();
     public AudioSource aud;
     public WaveformTex wf;
+    public WaveformInteract wfi;
     public float offset; // Offset in seconds
+    public float inputDelay = 0.144f; // Delay for input
     Image im;
 
 
-    int audioLength;
     public float bpm = 110;
     float crothet;
     public float spb; // Samples per beat
@@ -22,7 +23,6 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
     private void Start() {
         mapping.Add(new List<bool>());
 
-        audioLength = aud.clip.samples;
         samplesPerSecond = aud.clip.samples / aud.clip.length;
         updateBpm(bpm);
 
@@ -67,8 +67,10 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
 
     }
 
-
     public void OnPointerClick(PointerEventData eventData) {
+        if (eventData.button != PointerEventData.InputButton.Left) {
+            return;
+        }
         int samp = wf.getMusicPoint(Input.mousePosition);
         int beat;
         if(samp < offset * samplesPerSecond + spb) {
@@ -136,4 +138,46 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
 
         return tex;
     }
+
+
+
+
+    private void Update() {
+        if (Input.GetMouseButton(1)) {
+            int samp = wf.getMusicPoint(Input.mousePosition);
+            int beat;
+
+            if (samp < offset * samplesPerSecond + spb) {
+                beat = 0;
+            } else {
+                beat = SampleToBeat(samp);
+            }
+
+            if (mapping[0][beat]) {
+                mapping[0][beat] = false;
+                UpdateEditor();
+            }
+            
+        }
+
+        
+
+
+
+        if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.Escape) && !Input.GetMouseButtonDown(0) && !Input.GetMouseButtonDown(1) && wfi.playing) {
+            // Debug.Log(inputDelay * samplesPerSecond + ", " + samplesPerSecond + ", " + spb);
+            int samp = aud.timeSamples - (int) (inputDelay * samplesPerSecond);
+            int beat;
+            if (samp < offset * samplesPerSecond + spb) {
+                beat = 0;
+            } else {
+                beat = SampleToBeat(samp);
+            }
+
+
+            mapping[0][beat] = true;
+            UpdateEditor();
+        }
+    }
+
 }
