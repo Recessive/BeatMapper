@@ -14,7 +14,7 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
 
 
     int audioLength;
-    public float bpm = 105;
+    public float bpm = 110;
     float crothet;
     public float spb; // Samples per beat
     public float samplesPerSecond;
@@ -29,19 +29,24 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
         im = GetComponent<Image>();
 
         UpdateEditor(0);
+
     }
 
     public float LastBeatSample(float sample) {
+        return LastBeatSample(sample, true);
+    }
+
+    public float LastBeatSample(float sample, bool inSamples) {
         if(sample < offset * samplesPerSecond) {
             return -1;
         } else {
-            return Mathf.Floor((sample - offset * samplesPerSecond) / spb) * spb;
+            return Mathf.Floor((sample - offset * samplesPerSecond) / spb) * (inSamples ? spb : 1);
         }
     }
 
     public int SampleToBeat(float sample) {
-        int lbs = (int) LastBeatSample(sample);
-        return lbs == -1 ? -1 : (int) (lbs / spb);
+        int lbs = (int) LastBeatSample(sample, false);
+        return lbs == -1 ? -1 : lbs;
     }
 
     public void updateBpm(float newBpm) {
@@ -101,16 +106,17 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
         float samplesPerPixel = wf.window / (float) textWidth;
 
         float lastBeat = LastBeatSample(sample);
-        int beat = SampleToBeat(sample);
+        int beat = SampleToBeat(lastBeat);
         bool isBeat;
         float pixSamp;
 
         for (int x = 0; x < textWidth; x++) {
             isBeat = false;
             pixSamp = x * samplesPerPixel + sample;
-            if(LastBeatSample(pixSamp) != lastBeat) {
+            if (LastBeatSample(pixSamp) != lastBeat) {
                 lastBeat = LastBeatSample(pixSamp);
                 isBeat = true;
+
                 beat = SampleToBeat(pixSamp);
             }
             for (int y = 0; y < textHeight; y++) {
@@ -118,8 +124,10 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
                     tex.SetPixel(x, y, Color.black);
                 } else if(beat >= 0 && mapping[0][beat]) {
                     tex.SetPixel(x, y, Color.white);
+                } else if(beat % 2 == 0){
+                    tex.SetPixel(x, y, new Color(0.4f, 0.4f, 0.4f));
                 } else {
-                    tex.SetPixel(x, y, Color.gray);
+                    tex.SetPixel(x, y, new Color(0.5f, 0.5f, 0.5f));
                 }
             }
         }

@@ -1802,7 +1802,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 4e9d416e8566a04429dea0cf8f46cef3, type: 3}
+  m_audioClip: {fileID: 8300000, guid: 4dce5576a47e93b4295c70cffd750b43, type: 3}
   m_PlayOnAwake: 0
   m_Volume: 0.364
   m_Pitch: 1
@@ -2458,6 +2458,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1686417148}
+  - component: {fileID: 1686417149}
   m_Layer: 5
   m_Name: BPMController
   m_TagString: Untagged
@@ -2486,6 +2487,20 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1686417149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1686417147}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7fa724e4874c1d94aa5fe2069fb1c3de, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  edDraw: {fileID: 1804313260}
+  input: {fileID: 990571453}
 --- !u!1 &1721691211
 GameObject:
   m_ObjectHideFlags: 0
@@ -2772,7 +2787,7 @@ MonoBehaviour:
   aud: {fileID: 1363914960}
   wf: {fileID: 1363914961}
   offset: 0
-  bpm: 105
+  bpm: 110
   spb: 0
   samplesPerSecond: 0
 --- !u!114 &1804313261
