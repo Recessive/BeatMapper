@@ -3,18 +3,33 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using System.IO;
 
 public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler 
 {
+    public int id;
     public EditorDraw edDraw;
 
     public AudioSource aud;
     public WaveformTex wf;
     public WaveformInteract wfi;
 
+    public Toggle tapNoteToggle;
+    public Toggle playSoundToggle;
+    public Dropdown metSoundDropdown;
+    public Slider volumeSlider;
+    public Toggle deleteToggle;
+    public GameObject buttonGO;
+    public Button deleteButton;
+
+    bool tapEnabled = true;
+    bool playSoundEnabled = true;
+
     List<bool> mapping = new List<bool>();
 
     Image im;
+    AudioSource metAud;
+
     bool pointerInside = false;
 
     void OnEnable() {
@@ -27,10 +42,60 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
 
     private void Start() {
+        tapNoteToggle.onValueChanged.AddListener(tapChange);
+        playSoundToggle.onValueChanged.AddListener(playSoundChange);
+        volumeSlider.onValueChanged.AddListener(volumeChange);
+        metSoundDropdown.onValueChanged.AddListener(metSoundChange);
+        deleteToggle.onValueChanged.AddListener(deleteToggleChange);
+        deleteButton.onClick.AddListener(deleteButtonClicked);
+
+        metAud = GetComponent<AudioSource>();
+
+        metSoundDropdown.options.Clear();
+        string datPath = Application.dataPath;
+        DirectoryInfo dir = new DirectoryInfo(datPath + "/Resources/Sounds");
+        FileInfo[] info = dir.GetFiles("*.wav");
+        List<string> fnames = new List<string>();
+
+        foreach (FileInfo f in info) {
+            string fn = Path.GetFileNameWithoutExtension(f.ToString());
+            fnames.Add(fn);
+        }
+        metSoundDropdown.AddOptions(fnames);
+        metSoundChange(0);
+
         im = GetComponent<Image>();
+        
         updateBpm();
 
         UpdateEditor();
+    }
+
+    void tapChange(bool val) {
+        tapEnabled = val;
+    }
+
+    void playSoundChange(bool val) {
+        playSoundEnabled = val;
+    }
+
+    void metSoundChange(int val) {
+        
+        AudioClip clip = Resources.Load<AudioClip>("Sounds/" + metSoundDropdown.options[val].text);
+        metAud.clip = clip;
+    }
+
+    void volumeChange(float val) {
+        metAud.volume = val;
+    }
+
+    void deleteToggleChange(bool val) {
+        buttonGO.SetActive(val);
+    }
+
+    void deleteButtonClicked() {
+        edDraw.deleteMap(id);
+        Destroy(gameObject);
     }
 
 
@@ -87,14 +152,11 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
         Rect rect = new Rect(Vector2.zero, new Vector2(width, height));
 
-
-        Debug.Log(im);
-
         im.sprite = Sprite.Create(tex, rect, Vector2.zero);
     }
 
     private void beat(int beat) {
-        if(mapping[beat]) wfi.met.Play();
+        if(mapping[beat] && playSoundEnabled) metAud.Play();
     }
 
     private void Update() {
@@ -113,6 +175,27 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 UpdateEditor();
             }
 
+        }
+
+
+        if (tapEnabled &&
+            Input.anyKeyDown &&
+            wfi.playing &&
+            !Input.GetKeyDown(KeyCode.Space) && 
+            !Input.GetKeyDown(KeyCode.Escape) && 
+            !Input.GetMouseButtonDown(0) && 
+            !Input.GetMouseButtonDown(1)) {
+            int samp = aud.timeSamples - (int) (edDraw.inputDelay * edDraw.samplesPerSecond);
+            int beat;
+            if (samp < edDraw.offset * edDraw.samplesPerSecond + edDraw.spb) {
+                beat = 0;
+            } else {
+                beat = edDraw.SampleToBeat(samp);
+            }
+
+
+            mapping[beat] = true;
+            UpdateEditor();
         }
 
     }

@@ -10,6 +10,7 @@ public class EditorDraw : MonoBehaviour
     public AudioSource aud;
     public WaveformTex wf;
     public WaveformInteract wfi;
+    public Button addMapButton;
     public float offset; // Offset in seconds
     public float inputDelay; // Delay for input
 
@@ -28,25 +29,41 @@ public class EditorDraw : MonoBehaviour
         edCtr.wf = wf;
         edCtr.wfi = wfi;
 
-        addNewMap();
-        addNewMap();
+        addMapButton.onClick.AddListener(addNewMap);
 
         samplesPerSecond = aud.clip.samples / aud.clip.length;
         updateBpm(bpm);
     }
 
     private void addNewMap() {
+        RectTransform rectTrans = addMapButton.GetComponent<RectTransform>();
+        rectTrans.anchoredPosition = new Vector2(0, rectTrans.anchoredPosition.y - 80);
+
+
         GameObject go = Instantiate(mapPrefab);
         go.transform.SetParent(transform);
-        RectTransform rectTrans = go.GetComponent<RectTransform>();
+        rectTrans = go.GetComponent<RectTransform>();
 
         rectTrans.anchoredPosition = new Vector2(0, lastMapPos-=80);
 
-        
-
         EditorController edCtr = go.GetComponent<EditorController>();
+        edCtr.id = maps.Count;
 
         maps.Add(edCtr);
+
+    }
+
+    public void deleteMap(int ind) {
+        maps.RemoveAt(ind);
+        RectTransform rectTrans;
+        rectTrans = addMapButton.GetComponent<RectTransform>();
+        rectTrans.anchoredPosition = new Vector2(0, rectTrans.anchoredPosition.y + 80);
+        lastMapPos += 80;
+        for (int i = ind; i < maps.Count; i++) {
+            maps[i].id--;
+            rectTrans = maps[i].GetComponent<RectTransform>();
+            rectTrans.anchoredPosition = new Vector2(0, rectTrans.anchoredPosition.y + 80);
+        }
     }
 
     public float LastBeatSample(float sample) {
@@ -126,32 +143,6 @@ public class EditorDraw : MonoBehaviour
 
 
         return tex;
-    }
-
-
-
-
-    private void Update() {
-        
-
-        
-
-
-
-        /*if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.Escape) && !Input.GetMouseButtonDown(0) && !Input.GetMouseButtonDown(1) && wfi.playing) {
-            // Debug.Log(inputDelay * samplesPerSecond + ", " + samplesPerSecond + ", " + spb);
-            int samp = aud.timeSamples - (int) (inputDelay * samplesPerSecond);
-            int beat;
-            if (samp < offset * samplesPerSecond + spb) {
-                beat = 0;
-            } else {
-                beat = SampleToBeat(samp);
-            }
-
-
-            mapping[0][beat] = true;
-            UpdateEditor();
-        }*/
     }
 
 }
