@@ -21,6 +21,8 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
     public EditorDraw edDraw;
     public AudioSource met;
 
+    public event System.Action<int> onBeat;
+
     float lastBeatSample;
 
     private void Start() {
@@ -54,10 +56,7 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
             barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
             if(edDraw.LastBeatSample(aud.timeSamples) != lastBeatSample) {
                 lastBeatSample = edDraw.LastBeatSample(aud.timeSamples);
-
-                if (edDraw.SampleToBeat(aud.timeSamples) != -1 && edDraw.mapping[0][edDraw.SampleToBeat(aud.timeSamples)]) {
-                    met.Play();
-                }
+                onBeat?.Invoke(edDraw.SampleToBeat(aud.timeSamples));
             }
         }
     }

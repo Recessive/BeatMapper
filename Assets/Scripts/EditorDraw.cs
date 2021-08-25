@@ -2,18 +2,18 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
-public class EditorDraw : MonoBehaviour, IPointerClickHandler
+public class EditorDraw : MonoBehaviour
 {
-    public List<List<bool>> mapping = new List<List<bool>>();
+    public GameObject mapPrefab;
+    public List<EditorController> maps;
     public AudioSource aud;
     public WaveformTex wf;
     public WaveformInteract wfi;
     public float offset; // Offset in seconds
     public float inputDelay; // Delay for input
-    Image im;
 
+    float lastMapPos = 400;
 
     public float bpm = 1;
     float crothet;
@@ -21,15 +21,32 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
     public float samplesPerSecond;
 
     private void Start() {
-        mapping.Add(new List<bool>());
+        EditorController edCtr = mapPrefab.GetComponent<EditorController>();
+
+        edCtr.edDraw = this;
+        edCtr.aud = aud;
+        edCtr.wf = wf;
+        edCtr.wfi = wfi;
+
+        addNewMap();
+        addNewMap();
 
         samplesPerSecond = aud.clip.samples / aud.clip.length;
         updateBpm(bpm);
+    }
 
-        im = GetComponent<Image>();
+    private void addNewMap() {
+        GameObject go = Instantiate(mapPrefab);
+        go.transform.SetParent(transform);
+        RectTransform rectTrans = go.GetComponent<RectTransform>();
 
-        UpdateEditor(0);
+        rectTrans.anchoredPosition = new Vector2(0, lastMapPos-=80);
 
+        
+
+        EditorController edCtr = go.GetComponent<EditorController>();
+
+        maps.Add(edCtr);
     }
 
     public float LastBeatSample(float sample) {
@@ -54,35 +71,13 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
         crothet = bpm / 60f;
         spb = samplesPerSecond / crothet;
 
-        int totalBeats = (int) (aud.clip.samples / spb) + 1;
-        if(totalBeats > mapping[0].Count) {
-            for(int i = mapping[0].Count; i < totalBeats; i++) {
-                mapping[0].Add(false);
-            }
-        }else if (totalBeats < mapping[0].Count) {
-            for (int i = mapping[0].Count; i > totalBeats; i--) {
-                mapping[0].RemoveAt(i-1);
-            }
+        foreach (EditorController edCtr in maps) {
+            edCtr.updateBpm();
         }
 
     }
 
-    public void OnPointerClick(PointerEventData eventData) {
-        if (eventData.button != PointerEventData.InputButton.Left) {
-            return;
-        }
-        int samp = wf.getMusicPoint(Input.mousePosition);
-        int beat;
-        if(samp < offset * samplesPerSecond + spb) {
-            beat = 0;
-        } else {
-            beat = SampleToBeat(samp);
-        }
-        
-
-        mapping[0][beat] = !mapping[0][beat];
-        UpdateEditor();
-    }
+    
 
 
     public void UpdateEditor() {
@@ -90,18 +85,12 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
     }
 
     public void UpdateEditor(int sample) {
-        RectTransform rectTrans = GetComponent<RectTransform>();
-        int width = (int)rectTrans.rect.width;
-        int height = (int)rectTrans.rect.height;
-
-        Texture2D tex = PaintMap(sample, width, height);
-
-        Rect rect = new Rect(Vector2.zero, new Vector2(width, height));
-
-        im.sprite = Sprite.Create(tex, rect, Vector2.zero);
+        foreach (EditorController edCtr in maps) {
+            edCtr.UpdateEditor(sample);
+        }
     }
 
-    public Texture2D PaintMap(int sample, int textWidth, int textHeight) {
+    public Texture2D PaintMap(int sample, int textWidth, int textHeight, List<bool> map) {
 
         Texture2D tex = new Texture2D(textWidth, textHeight, TextureFormat.RGBA32, false);
 
@@ -124,7 +113,7 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
             for (int y = 0; y < textHeight; y++) {
                 if(isBeat) {
                     tex.SetPixel(x, y, Color.black);
-                } else if(beat >= 0 && mapping[0][beat]) {
+                } else if(beat >= 0 && map[beat]) {
                     tex.SetPixel(x, y, Color.white);
                 } else if(beat % 2 == 0){
                     tex.SetPixel(x, y, new Color(0.4f, 0.4f, 0.4f));
@@ -143,28 +132,13 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
 
 
     private void Update() {
-        if (Input.GetMouseButton(1)) {
-            int samp = wf.getMusicPoint(Input.mousePosition);
-            int beat;
-
-            if (samp < offset * samplesPerSecond + spb) {
-                beat = 0;
-            } else {
-                beat = SampleToBeat(samp);
-            }
-
-            if (mapping[0][beat]) {
-                mapping[0][beat] = false;
-                UpdateEditor();
-            }
-            
-        }
+        
 
         
 
 
 
-        if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.Escape) && !Input.GetMouseButtonDown(0) && !Input.GetMouseButtonDown(1) && wfi.playing) {
+        /*if (Input.anyKeyDown && !Input.GetKeyDown(KeyCode.Space) && !Input.GetKeyDown(KeyCode.Escape) && !Input.GetMouseButtonDown(0) && !Input.GetMouseButtonDown(1) && wfi.playing) {
             // Debug.Log(inputDelay * samplesPerSecond + ", " + samplesPerSecond + ", " + spb);
             int samp = aud.timeSamples - (int) (inputDelay * samplesPerSecond);
             int beat;
@@ -177,7 +151,7 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
 
             mapping[0][beat] = true;
             UpdateEditor();
-        }
+        }*/
     }
 
 }
