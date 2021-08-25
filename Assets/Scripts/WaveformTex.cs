@@ -25,7 +25,7 @@ public class WaveformTex : MonoBehaviour
     public Scrollbar scrollbar;
     public EditorDraw edDraw;
 
-    public void Awake() {
+    public void SongLoaded() {
         rectTrans = GetComponent<RectTransform>();
         im = GetComponent<Image>();
         aud = GetComponent<AudioSource>();

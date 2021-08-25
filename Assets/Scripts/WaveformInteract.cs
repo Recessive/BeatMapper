@@ -33,6 +33,7 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
 
 
     public void OnPointerClick(PointerEventData eventData) {
+        if (!edDraw.loaded) return;
         int samp = wf.getMusicPoint(Input.mousePosition);
         aud.timeSamples = samp;
         barRect.localPosition = new Vector2(wf.sampleToPoint(aud.timeSamples), barRect.localPosition.y);
@@ -40,6 +41,7 @@ public class WaveformInteract : MonoBehaviour, IPointerClickHandler
 
     public bool playing = false;
     void playpause() {
+        if (!edDraw.loaded) return;
         playing = !playing;
         if (playing) {
             aud.Play();

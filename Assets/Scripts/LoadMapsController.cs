@@ -27,16 +27,14 @@ public class LoadMapsController : MonoBehaviour
             if (choice != 1) return;
         }
 
-        IntPtr fileName = tinyfd.tinyfd_openFileDialog("Save beat map file", "", 2, new string[] { "*.beatmap", "*.txt" }, "Beat map files (*.beatmap, *.txt)", 0);
+        IntPtr fileName = tinyfd.tinyfd_openFileDialog("Load beat map file", "", 2, new string[] { "*.beatmap", "*.txt" }, "Beat map files (*.beatmap, *.txt)", 0);
         string fileNameString = tinyfd.stringFromAnsi(fileName);
 
         if (fileNameString != null) {
             string readText = File.ReadAllText(fileNameString);
             string[] lines = readText.Split('\n');
-            
-            while(edDraw.maps.Count > 0) {
-                edDraw.deleteMap(0);
-            }
+
+            edDraw.clear();
 
             edDraw.updateBpm(float.Parse(lines[0].Split(',')[0]));
             bpmInput.text = lines[0].Split(',')[0];

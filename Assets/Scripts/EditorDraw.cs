@@ -22,6 +22,13 @@ public class EditorDraw : MonoBehaviour
     public float samplesPerSecond;
 
     public bool unsaved = false;
+    public bool loaded = false;
+
+    public void clear() {
+        while (maps.Count > 0) {
+            deleteMap(0);
+        }
+    }
 
     private void Start() {
         EditorController edCtr = mapPrefab.GetComponent<EditorController>();
@@ -33,12 +40,18 @@ public class EditorDraw : MonoBehaviour
 
         addMapButton.onClick.AddListener(addNewMap);
 
+    }
+
+    public void SongLoaded() {
         samplesPerSecond = aud.clip.samples / aud.clip.length;
         updateBpm(bpm);
         unsaved = false;
+        loaded = true;
     }
 
     public void addNewMap() {
+        if (!loaded) return;
+
         unsaved = true;
         RectTransform rectTrans = addMapButton.GetComponent<RectTransform>();
         rectTrans.anchoredPosition = new Vector2(0, rectTrans.anchoredPosition.y - 80);
@@ -59,6 +72,7 @@ public class EditorDraw : MonoBehaviour
 
     public void deleteMap(int ind) {
         unsaved = true;
+        GameObject go = maps[ind].gameObject;
         maps.RemoveAt(ind);
         RectTransform rectTrans;
         rectTrans = addMapButton.GetComponent<RectTransform>();
@@ -69,6 +83,7 @@ public class EditorDraw : MonoBehaviour
             rectTrans = maps[i].GetComponent<RectTransform>();
             rectTrans.anchoredPosition = new Vector2(0, rectTrans.anchoredPosition.y + 80);
         }
+        Destroy(go);
     }
 
     public float LastBeatSample(float sample) {

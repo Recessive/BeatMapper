@@ -40,7 +40,6 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
         wfi.onBeat -= beat;
     }
 
-
     private void Start() {
         tapNoteToggle.onValueChanged.AddListener(tapChange);
         playSoundToggle.onValueChanged.AddListener(playSoundChange);
@@ -95,7 +94,6 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
     void deleteButtonClicked() {
         edDraw.deleteMap(id);
-        Destroy(gameObject);
     }
 
 
@@ -181,12 +179,9 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
         if (tapEnabled &&
             Input.anyKeyDown &&
-            wfi.playing &&
-            !Input.GetKeyDown(KeyCode.Space) && 
-            !Input.GetKeyDown(KeyCode.Escape) && 
-            !Input.GetMouseButtonDown(0) && 
-            !Input.GetMouseButtonDown(1)) {
-            int samp = aud.timeSamples - (int) (edDraw.inputDelay * edDraw.samplesPerSecond);
+            Input.inputString.Length > 0 &&
+            char.IsLetter(Input.inputString[0])) {
+            int samp = aud.timeSamples - (int)(edDraw.inputDelay * edDraw.samplesPerSecond);
             int beat;
             if (samp < edDraw.offset * edDraw.samplesPerSecond + edDraw.spb) {
                 beat = 0;
