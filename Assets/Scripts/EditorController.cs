@@ -25,7 +25,7 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
     bool tapEnabled = true;
     bool playSoundEnabled = true;
 
-    List<bool> mapping = new List<bool>();
+    public List<bool> mapping = new List<bool>();
 
     Image im;
     AudioSource metAud;
@@ -134,7 +134,7 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
             beat = edDraw.SampleToBeat(samp);
         }
 
-
+        edDraw.unsaved = true;
         mapping[beat] = !mapping[beat];
         UpdateEditor();
     }
@@ -171,6 +171,7 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
             }
 
             if (mapping[beat]) {
+                edDraw.unsaved = true;
                 mapping[beat] = false;
                 UpdateEditor();
             }
@@ -193,9 +194,12 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 beat = edDraw.SampleToBeat(samp);
             }
 
-
-            mapping[beat] = true;
-            UpdateEditor();
+            if (!mapping[beat]) {
+                edDraw.unsaved = true;
+                mapping[beat] = true;
+                UpdateEditor();
+            }
+                
         }
 
     }

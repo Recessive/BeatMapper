@@ -21,6 +21,8 @@ public class EditorDraw : MonoBehaviour
     public float spb; // Samples per beat
     public float samplesPerSecond;
 
+    public bool unsaved = false;
+
     private void Start() {
         EditorController edCtr = mapPrefab.GetComponent<EditorController>();
 
@@ -33,9 +35,11 @@ public class EditorDraw : MonoBehaviour
 
         samplesPerSecond = aud.clip.samples / aud.clip.length;
         updateBpm(bpm);
+        unsaved = false;
     }
 
-    private void addNewMap() {
+    public void addNewMap() {
+        unsaved = true;
         RectTransform rectTrans = addMapButton.GetComponent<RectTransform>();
         rectTrans.anchoredPosition = new Vector2(0, rectTrans.anchoredPosition.y - 80);
 
@@ -54,6 +58,7 @@ public class EditorDraw : MonoBehaviour
     }
 
     public void deleteMap(int ind) {
+        unsaved = true;
         maps.RemoveAt(ind);
         RectTransform rectTrans;
         rectTrans = addMapButton.GetComponent<RectTransform>();
@@ -84,6 +89,7 @@ public class EditorDraw : MonoBehaviour
     }
 
     public void updateBpm(float newBpm) {
+        unsaved = true;
         bpm = newBpm;
         crothet = bpm / 60f;
         spb = samplesPerSecond / crothet;

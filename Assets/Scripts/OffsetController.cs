@@ -18,6 +18,7 @@ public class OffsetController : MonoBehaviour
     public void inputChange(string val) {
         float f;
         if (float.TryParse(val, out f)) {
+            edDraw.unsaved = true;
             edDraw.offset = f;
             edDraw.UpdateEditor();
         }
