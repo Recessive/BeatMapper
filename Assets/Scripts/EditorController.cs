@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using System.IO;
+using System;
 
 public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler 
 {
@@ -51,13 +52,12 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
         metAud = GetComponent<AudioSource>();
 
         metSoundDropdown.options.Clear();
-        string datPath = Application.dataPath;
-        DirectoryInfo dir = new DirectoryInfo(datPath + "/Resources/Sounds");
-        FileInfo[] info = dir.GetFiles("*.wav");
+        DirectoryInfo dir = new DirectoryInfo(Application.streamingAssetsPath + "/Sounds/");
+        FileInfo[] info = dir.GetFiles("*");
         List<string> fnames = new List<string>();
 
         foreach (FileInfo f in info) {
-            string fn = Path.GetFileNameWithoutExtension(f.ToString());
+            string fn = Path.GetFileName(f.ToString());
             fnames.Add(fn);
         }
         metSoundDropdown.AddOptions(fnames);
@@ -80,8 +80,12 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
 
     void metSoundChange(int val) {
         
-        AudioClip clip = Resources.Load<AudioClip>("Sounds/" + metSoundDropdown.options[val].text);
+        StartCoroutine(LoadSongCoroutine(Application.streamingAssetsPath + "/Sounds/" + metSoundDropdown.options[val].text, SongLoaded));
+    }
+
+    void SongLoaded(AudioClip clip) {
         metAud.clip = clip;
+
     }
 
     void volumeChange(float val) {
@@ -197,6 +201,17 @@ public class EditorController : MonoBehaviour, IPointerClickHandler, IPointerEnt
                 
         }
 
+    }
+
+
+    IEnumerator LoadSongCoroutine(string songName, Action<AudioClip> onSongLoaded) {
+        string url = string.Format("file://{0}", songName);
+        WWW www = new WWW(url);
+
+        yield return www;
+
+        AudioClip clip = www.GetAudioClip(false, false);
+        onSongLoaded?.Invoke(clip);
     }
 
 }

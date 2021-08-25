@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.IO;
 
 class tinyfd {
-    public const string mDllLocation = "Assets\\Scripts\\tinyfile_dlls\\tinyfiledialogs64.dll";
+    public const string mDllLocation = "tinyfiledialogs64.dll";
 
     [DllImport(mDllLocation, CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
     public static extern int tinyfd_messageBox(string aTitle, string aMessage, string aDialogTyle, string aIconType, int aDefaultButton);
