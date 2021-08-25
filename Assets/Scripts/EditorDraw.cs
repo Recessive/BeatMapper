@@ -11,11 +11,11 @@ public class EditorDraw : MonoBehaviour, IPointerClickHandler
     public WaveformTex wf;
     public WaveformInteract wfi;
     public float offset; // Offset in seconds
-    public float inputDelay = 0.144f; // Delay for input
+    public float inputDelay; // Delay for input
     Image im;
 
 
-    public float bpm = 110;
+    public float bpm = 1;
     float crothet;
     public float spb; // Samples per beat
     public float samplesPerSecond;
